@@ -28,7 +28,7 @@
         {
           "minDays": 730,
           "maxDays": 1094,
-          "regular": 7.0,
+          "regular": 7,
           "senior": 7.5
         },
         {
@@ -53,39 +53,117 @@
       "slabs": [
         {
           "minDays": 7,
-          "maxDays": 179,
-          "regular": 4.5,
-          "senior": 5.0
+          "maxDays": 14,
+          "regular": 2.75,
+          "senior": 3.25
         },
         {
-          "minDays": 180,
-          "maxDays": 364,
+          "minDays": 15,
+          "maxDays": 29,
+          "regular": 2.75,
+          "senior": 3.25
+        },
+        {
+          "minDays": 30,
+          "maxDays": 45,
+          "regular": 3.25,
+          "senior": 3.75
+        },
+        {
+          "minDays": 46,
+          "maxDays": 60,
+          "regular": 4.25,
+          "senior": 4.75
+        },
+        {
+          "minDays": 61,
+          "maxDays": 89,
+          "regular": 4.25,
+          "senior": 4.75
+        },
+        {
+          "minDays": 90,
+          "maxDays": 180,
+          "regular": 4.25,
+          "senior": 4.75
+        },
+        {
+          "minDays": 181,
+          "maxDays": 270,
           "regular": 5.5,
-          "senior": 6.0
+          "senior": 6
+        },
+        {
+          "minDays": 271,
+          "maxDays": 364,
+          "regular": 5.75,
+          "senior": 6.25
         },
         {
           "minDays": 365,
-          "maxDays": 729,
-          "regular": 6.6,
-          "senior": 7.1
+          "maxDays": 449,
+          "regular": 6.25,
+          "senior": 6.75
         },
         {
-          "minDays": 730,
-          "maxDays": 1094,
-          "regular": 7.0,
-          "senior": 7.5
+          "minDays": 450,
+          "maxDays": 539,
+          "regular": 6.35,
+          "senior": 6.85
         },
         {
-          "minDays": 1095,
-          "maxDays": 1824,
-          "regular": 7.0,
-          "senior": 7.5
+          "minDays": 540,
+          "maxDays": 629,
+          "regular": 6.45,
+          "senior": 6.95
         },
         {
-          "minDays": 1825,
-          "maxDays": 3650,
+          "minDays": 630,
+          "maxDays": 730,
+          "regular": 6.45,
+          "senior": 6.95
+        },
+        {
+          "minDays": 731,
+          "maxDays": 1059,
+          "regular": 6.45,
+          "senior": 6.95
+        },
+        {
+          "minDays": 1050,
+          "maxDays": 1050,
+          "regular": 6.45,
+          "senior": 6.95
+        },
+        {
+          "minDays": 1061,
+          "maxDays": 1095,
+          "regular": 6.45,
+          "senior": 6.95
+        },
+        {
+          "minDays": 1096,
+          "maxDays": 1669,
           "regular": 6.5,
-          "senior": 7.5
+          "senior": 7
+        },
+        {
+          "minDays": 1650,
+          "maxDays": 1650,
+          "regular": 6.4,
+          "senior": 6.9
+        },
+        {
+          "minDays": 1671,
+          "maxDays": 1825,
+          "regular": 6.4,
+          "senior": 6.9
+        },
+        {
+          "minDays": 1826,
+          "maxDays": 3650,
+          "regular": 6.15,
+          "senior": 6.65
         }
       ]
     },
@@ -122,7 +200,7 @@
         {
           "minDays": 1095,
           "maxDays": 1824,
-          "regular": 7.0,
+          "regular": 7,
           "senior": 7.5
         },
         {
