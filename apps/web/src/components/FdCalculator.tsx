@@ -589,7 +589,7 @@ export function FdCalculator() {
             )}
 
             <p className="text-[11px] text-muted-foreground text-center pt-4">
-              Indicative rates for illustration only. Verify with your bank before
+              Data may be inaccurate. Verify with your bank before
               investing.
             </p>
           </section>
