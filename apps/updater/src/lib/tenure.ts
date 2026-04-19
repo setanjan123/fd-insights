@@ -26,8 +26,17 @@ export function parseTenure(text: string): {
 
   // Regex patterns tailored to HDFC / general formats
 
-  // 1. Day Ranges (e.g. "7 - 14 days", "30-45 days")
+  // 1a. Day Ranges with dash (e.g. "7 - 14 days", "30-45 days")
   match = lowerText.match(/^(\d+)\s*-\s*(\d+)\s*days?$/);
+  if (match) {
+    return {
+      minDays: parseInt(match[1]!, 10),
+      maxDays: parseInt(match[2]!, 10),
+    };
+  }
+
+  // 1b. Day Ranges with "to" (e.g. "7 to 45 Days", "46 to 90 Days")
+  match = lowerText.match(/^(\d+)\s*to\s*(\d+)\s*days?$/);
   if (match) {
     return {
       minDays: parseInt(match[1]!, 10),
@@ -60,6 +69,12 @@ export function parseTenure(text: string): {
       if(dMatch) days = parseInt(dMatch[1]!, 10);
     }
 
+    // Bare number fallback: if no unit keyword matched (e.g. "185" in "185 to < 1 Year"),
+    // treat it as a day count.
+    if (days === 0) {
+      const bareMatch = pStr.match(/^(\d+)$/);
+      if (bareMatch) days = parseInt(bareMatch[1]!, 10);
+    }
 
     return days;
   }
