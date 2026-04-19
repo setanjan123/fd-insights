@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { BANKS } from "@/lib/banks";
-import { calculateFd, formatINR, formatINRCompact, type PayoutType } from "@/lib/fd";
+import { calculateFd, formatINR, formatINRCompact, formatTenure, type PayoutType } from "@/lib/fd";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -23,24 +23,29 @@ export function FdCalculator() {
   const [amount, setAmount] = useState<number>(100000);
   const [years, setYears] = useState<number>(2);
   const [months, setMonths] = useState<number>(0);
+  const [days, setDays] = useState<number>(0);
   const [payoutType, setPayoutType] = useState<PayoutType>("cumulative");
   const [isSenior, setIsSenior] = useState<boolean>(false);
   const [selectedBanks, setSelectedBanks] = useState<string[]>(ALL_BANK_IDS);
 
-  const totalMonths = Math.max(1, years * 12 + months);
+  const totalDays = Math.max(1, years * 365 + months * 30 + days);
 
   const results = useMemo(() => {
     return BANKS.filter((b) => selectedBanks.includes(b.id))
       .map((b) =>
         calculateFd(b, {
           principal: amount,
-          totalMonths,
+          totalDays,
           payoutType,
           isSenior,
         }),
       )
-      .sort((a, b) => b.maturityAmount - a.maturityAmount);
-  }, [amount, totalMonths, payoutType, isSenior, selectedBanks]);
+      .sort((a, b) =>
+        payoutType === "non-cumulative"
+          ? b.quarterlyPayout - a.quarterlyPayout
+          : b.maturityAmount - a.maturityAmount,
+      );
+  }, [amount, totalDays, payoutType, isSenior, selectedBanks]);
 
   const best = results[0];
   const worst = results[results.length - 1];
@@ -51,12 +56,7 @@ export function FdCalculator() {
     );
   };
 
-  const tenureLabel =
-    years > 0 && months > 0
-      ? `${years}y ${months}m`
-      : years > 0
-        ? `${years} year${years > 1 ? "s" : ""}`
-        : `${months} month${months > 1 ? "s" : ""}`;
+  const tenureLabel = formatTenure(totalDays);
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
@@ -167,10 +167,10 @@ export function FdCalculator() {
                       Tenure
                     </Label>
                     <span className="text-[11px] tabular-nums text-muted-foreground">
-                      {totalMonths} months
+                      {totalDays} {totalDays === 1 ? "day" : "days"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-3 gap-2 mt-2">
                     <NumberStepper
                       value={years}
                       min={0}
@@ -184,6 +184,13 @@ export function FdCalculator() {
                       max={11}
                       onChange={setMonths}
                       suffix="mo"
+                    />
+                    <NumberStepper
+                      value={days}
+                      min={0}
+                      max={29}
+                      onChange={setDays}
+                      suffix="d"
                     />
                   </div>
                 </div>
@@ -294,32 +301,68 @@ export function FdCalculator() {
                           Best return
                         </div>
                         <p className="text-sm opacity-70">{best.bankName}</p>
-                        <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums">
-                          {formatINR(best.maturityAmount)}
-                        </h2>
-                        <p className="text-xs opacity-60 mt-3 tabular-nums">
-                          {tenureLabel} · {best.rate.toFixed(2)}% p.a. ·{" "}
-                          {payoutType === "cumulative" ? "Cumulative" : "Payout"}
-                          {isSenior && " · Senior"}
-                        </p>
+                        {payoutType === "non-cumulative" ? (
+                          <>
+                            <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums text-success">
+                              {formatINR(best.quarterlyPayout)}
+                            </h2>
+                            <p className="text-xs opacity-70 mt-2">
+                              every quarter · {best.numPayouts} payout
+                              {best.numPayouts !== 1 ? "s" : ""} over {tenureLabel}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums">
+                              {formatINR(best.maturityAmount)}
+                            </h2>
+                            <p className="text-xs opacity-60 mt-3 tabular-nums">
+                              {tenureLabel} · {best.rate.toFixed(2)}% p.a. · Cumulative
+                              {isSenior && " · Senior"}
+                            </p>
+                          </>
+                        )}
                       </div>
                       <div className="flex gap-8 text-right">
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wider opacity-60">
-                            Interest
-                          </p>
-                          <p className="font-display text-2xl mt-1 tabular-nums text-success">
-                            +{formatINRCompact(best.totalInterest)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wider opacity-60">
-                            EAR
-                          </p>
-                          <p className="font-display text-2xl mt-1 tabular-nums">
-                            {best.effectiveAnnualReturn.toFixed(2)}%
-                          </p>
-                        </div>
+                        {payoutType === "non-cumulative" ? (
+                          <>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Rate
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {best.rate.toFixed(2)}%
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Principal back
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {formatINRCompact(amount)}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Interest
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums text-success">
+                                +{formatINRCompact(best.totalInterest)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                EAR
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {best.effectiveAnnualReturn.toFixed(2)}%
+                              </p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -332,21 +375,36 @@ export function FdCalculator() {
                       Comparison
                     </h3>
                     <span className="text-[11px] text-muted-foreground">
-                      Sorted by maturity
+                      {payoutType === "non-cumulative"
+                        ? "Sorted by quarterly payout"
+                        : "Sorted by maturity"}
                     </span>
                   </div>
 
                   <div className="divide-y divide-border/60">
                     {results.map((r, i) => {
                       const isBest = r.bankId === best?.bankId;
+                      const metric =
+                        payoutType === "non-cumulative"
+                          ? r.quarterlyPayout
+                          : r.totalInterest;
+                      const bestMetric =
+                        payoutType === "non-cumulative"
+                          ? best?.quarterlyPayout ?? 0
+                          : best?.totalInterest ?? 0;
                       const widthPct =
-                        best && best.totalInterest > 0
-                          ? Math.max(
-                              4,
-                              (r.totalInterest / best.totalInterest) * 100,
-                            )
+                        bestMetric > 0
+                          ? Math.max(4, (metric / bestMetric) * 100)
                           : 0;
-                      const diff = best ? r.maturityAmount - best.maturityAmount : 0;
+                      const primary =
+                        payoutType === "non-cumulative"
+                          ? r.quarterlyPayout
+                          : r.maturityAmount;
+                      const bestPrimary =
+                        payoutType === "non-cumulative"
+                          ? best?.quarterlyPayout ?? 0
+                          : best?.maturityAmount ?? 0;
+                      const diff = primary - bestPrimary;
 
                       return (
                         <div
@@ -392,22 +450,22 @@ export function FdCalculator() {
                             </div>
 
                             {/* Amount */}
-                            <div className="text-right w-32 sm:w-40 shrink-0">
+                            <div className="text-right w-36 sm:w-44 shrink-0">
                               <p className="font-display text-xl tabular-nums">
-                                {r.rate ? formatINR(r.maturityAmount) : "—"}
+                                {r.rate ? formatINR(primary) : "—"}
                               </p>
-                              {r.rate && diff !== 0 && (
+                              {r.rate && (
                                 <p
                                   className={cn(
                                     "text-[11px] tabular-nums mt-0.5",
-                                    isBest
-                                      ? "text-success"
-                                      : "text-muted-foreground",
+                                    isBest ? "text-success" : "text-muted-foreground",
                                   )}
                                 >
-                                  {isBest
-                                    ? `+${formatINRCompact(r.totalInterest)}`
-                                    : formatINRCompact(diff)}
+                                  {payoutType === "non-cumulative"
+                                    ? `per quarter · ${r.numPayouts} payouts`
+                                    : isBest
+                                      ? `+${formatINRCompact(r.totalInterest)} interest`
+                                      : `${formatINRCompact(diff)} vs best`}
                                 </p>
                               )}
                             </div>
@@ -424,14 +482,18 @@ export function FdCalculator() {
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                          Interest earned
+                          {payoutType === "non-cumulative"
+                            ? "Quarterly payout"
+                            : "Interest earned"}
                         </h3>
                         <p className="text-sm mt-1">
                           On{" "}
                           <span className="font-medium tabular-nums">
                             {formatINR(amount)}
                           </span>{" "}
-                          over {tenureLabel}
+                          {payoutType === "non-cumulative"
+                            ? "· paid every quarter"
+                            : `over ${tenureLabel}`}
                         </p>
                       </div>
                       {worst && best && worst.rate && best.rate && (
@@ -440,7 +502,12 @@ export function FdCalculator() {
                             Spread
                           </p>
                           <p className="font-display text-xl tabular-nums text-success">
-                            +{formatINRCompact(best.totalInterest - worst.totalInterest)}
+                            +
+                            {formatINRCompact(
+                              payoutType === "non-cumulative"
+                                ? best.quarterlyPayout - worst.quarterlyPayout
+                                : best.totalInterest - worst.totalInterest,
+                            )}
                           </p>
                         </div>
                       )}
@@ -452,7 +519,11 @@ export function FdCalculator() {
                             .filter((r) => r.rate)
                             .map((r) => ({
                               name: r.shortName,
-                              interest: Math.round(r.totalInterest),
+                              value: Math.round(
+                                payoutType === "non-cumulative"
+                                  ? r.quarterlyPayout
+                                  : r.totalInterest,
+                              ),
                               isBest: r.bankId === best?.bankId,
                             }))}
                           margin={{ top: 16, right: 8, bottom: 0, left: 8 }}
@@ -489,9 +560,12 @@ export function FdCalculator() {
                               fontSize: "12px",
                               boxShadow: "var(--shadow-elevated)",
                             }}
-                            formatter={(value: number) => [formatINR(value), "Interest"]}
+                            formatter={(value: number) => [
+                              formatINR(value),
+                              payoutType === "non-cumulative" ? "Per quarter" : "Interest",
+                            ]}
                           />
-                          <Bar dataKey="interest" radius={[8, 8, 0, 0]}>
+                          <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                             {results
                               .filter((r) => r.rate)
                               .map((r) => (
