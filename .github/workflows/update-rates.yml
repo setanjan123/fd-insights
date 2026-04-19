@@ -16,7 +16,7 @@ jobs:
           node-version: 24
           
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         
       - name: Run scrapers
         run: npm run update
