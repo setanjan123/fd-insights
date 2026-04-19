@@ -1,0 +1,137 @@
+{
+  "lastUpdated": "2026-04-19",
+  "banks": [
+    {
+      "id": "sbi",
+      "name": "State Bank of India",
+      "shortName": "SBI",
+      "accent": "var(--chart-1)",
+      "slabs": [
+        {
+          "minDays": 7,
+          "maxDays": 179,
+          "regular": 4.75,
+          "senior": 5.25
+        },
+        {
+          "minDays": 180,
+          "maxDays": 364,
+          "regular": 5.75,
+          "senior": 6.25
+        },
+        {
+          "minDays": 365,
+          "maxDays": 729,
+          "regular": 6.8,
+          "senior": 7.3
+        },
+        {
+          "minDays": 730,
+          "maxDays": 1094,
+          "regular": 7.0,
+          "senior": 7.5
+        },
+        {
+          "minDays": 1095,
+          "maxDays": 1824,
+          "regular": 6.75,
+          "senior": 7.25
+        },
+        {
+          "minDays": 1825,
+          "maxDays": 3650,
+          "regular": 6.5,
+          "senior": 7.5
+        }
+      ]
+    },
+    {
+      "id": "hdfc",
+      "name": "HDFC Bank",
+      "shortName": "HDFC",
+      "accent": "var(--chart-2)",
+      "slabs": [
+        {
+          "minDays": 7,
+          "maxDays": 179,
+          "regular": 4.5,
+          "senior": 5.0
+        },
+        {
+          "minDays": 180,
+          "maxDays": 364,
+          "regular": 5.5,
+          "senior": 6.0
+        },
+        {
+          "minDays": 365,
+          "maxDays": 729,
+          "regular": 6.6,
+          "senior": 7.1
+        },
+        {
+          "minDays": 730,
+          "maxDays": 1094,
+          "regular": 7.0,
+          "senior": 7.5
+        },
+        {
+          "minDays": 1095,
+          "maxDays": 1824,
+          "regular": 7.0,
+          "senior": 7.5
+        },
+        {
+          "minDays": 1825,
+          "maxDays": 3650,
+          "regular": 6.5,
+          "senior": 7.5
+        }
+      ]
+    },
+    {
+      "id": "icici",
+      "name": "ICICI Bank",
+      "shortName": "ICICI",
+      "accent": "var(--chart-3)",
+      "slabs": [
+        {
+          "minDays": 7,
+          "maxDays": 179,
+          "regular": 4.75,
+          "senior": 5.25
+        },
+        {
+          "minDays": 180,
+          "maxDays": 364,
+          "regular": 5.75,
+          "senior": 6.25
+        },
+        {
+          "minDays": 365,
+          "maxDays": 729,
+          "regular": 6.7,
+          "senior": 7.2
+        },
+        {
+          "minDays": 730,
+          "maxDays": 1094,
+          "regular": 7.1,
+          "senior": 7.6
+        },
+        {
+          "minDays": 1095,
+          "maxDays": 1824,
+          "regular": 7.0,
+          "senior": 7.5
+        },
+        {
+          "minDays": 1825,
+          "maxDays": 3650,
+          "regular": 6.6,
+          "senior": 7.5
+        }
+      ]
+    }
+  ]
+}
