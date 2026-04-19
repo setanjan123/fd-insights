@@ -87,12 +87,12 @@ export function parseTenure(text: string): {
   // "1 Year to < 15 months"
   // "21 months to 2 years" (Note: "to" means inclusive usually in these contexts, whereas "to <" is exclusive)
 
-  const rangeRegex = /^(.*?)(\s*to\s*<?\s*|\s*<=\s*)(.*?)$/;
+  const rangeRegex = /^(.*?)(\s*to\s*less\s*than\s*|\s*to\s*<?\s*|\s*<=\s*|\s*and\s*up\s*to\s*)(.*?)$/;
   match = lowerText.match(rangeRegex);
 
   if (match) {
     const leftPart = match[1]!;
-    const opPart = match[2]!.replace(/\s/g, ""); // "to<", "<=", "to"
+    const opPart = match[2]!.replace(/\s/g, ""); // "to<", "<=", "to", "tolessthan", "andupto"
     const rightPart = match[3]!;
 
     minDays = extractDaysFromPart(leftPart);
@@ -100,11 +100,11 @@ export function parseTenure(text: string): {
     // Some strings might not have a left part if they are just upper bounds
     const rawMaxDays = extractDaysFromPart(rightPart);
 
-    if (opPart === "to<" || opPart === "<") {
+    if (opPart === "to<" || opPart === "<" || opPart === "tolessthan") {
        // Exclusive upper bound
        maxDays = rawMaxDays - 1;
     } else {
-       // Inclusive upper bound ("<=", "to")
+       // Inclusive upper bound ("<=", "to", "andupto")
        maxDays = rawMaxDays;
     }
 
