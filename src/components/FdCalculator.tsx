@@ -375,21 +375,36 @@ export function FdCalculator() {
                       Comparison
                     </h3>
                     <span className="text-[11px] text-muted-foreground">
-                      Sorted by maturity
+                      {payoutType === "non-cumulative"
+                        ? "Sorted by quarterly payout"
+                        : "Sorted by maturity"}
                     </span>
                   </div>
 
                   <div className="divide-y divide-border/60">
                     {results.map((r, i) => {
                       const isBest = r.bankId === best?.bankId;
+                      const metric =
+                        payoutType === "non-cumulative"
+                          ? r.quarterlyPayout
+                          : r.totalInterest;
+                      const bestMetric =
+                        payoutType === "non-cumulative"
+                          ? best?.quarterlyPayout ?? 0
+                          : best?.totalInterest ?? 0;
                       const widthPct =
-                        best && best.totalInterest > 0
-                          ? Math.max(
-                              4,
-                              (r.totalInterest / best.totalInterest) * 100,
-                            )
+                        bestMetric > 0
+                          ? Math.max(4, (metric / bestMetric) * 100)
                           : 0;
-                      const diff = best ? r.maturityAmount - best.maturityAmount : 0;
+                      const primary =
+                        payoutType === "non-cumulative"
+                          ? r.quarterlyPayout
+                          : r.maturityAmount;
+                      const bestPrimary =
+                        payoutType === "non-cumulative"
+                          ? best?.quarterlyPayout ?? 0
+                          : best?.maturityAmount ?? 0;
+                      const diff = primary - bestPrimary;
 
                       return (
                         <div
@@ -435,22 +450,22 @@ export function FdCalculator() {
                             </div>
 
                             {/* Amount */}
-                            <div className="text-right w-32 sm:w-40 shrink-0">
+                            <div className="text-right w-36 sm:w-44 shrink-0">
                               <p className="font-display text-xl tabular-nums">
-                                {r.rate ? formatINR(r.maturityAmount) : "—"}
+                                {r.rate ? formatINR(primary) : "—"}
                               </p>
-                              {r.rate && diff !== 0 && (
+                              {r.rate && (
                                 <p
                                   className={cn(
                                     "text-[11px] tabular-nums mt-0.5",
-                                    isBest
-                                      ? "text-success"
-                                      : "text-muted-foreground",
+                                    isBest ? "text-success" : "text-muted-foreground",
                                   )}
                                 >
-                                  {isBest
-                                    ? `+${formatINRCompact(r.totalInterest)}`
-                                    : formatINRCompact(diff)}
+                                  {payoutType === "non-cumulative"
+                                    ? `per quarter · ${r.numPayouts} payouts`
+                                    : isBest
+                                      ? `+${formatINRCompact(r.totalInterest)} interest`
+                                      : `${formatINRCompact(diff)} vs best`}
                                 </p>
                               )}
                             </div>
