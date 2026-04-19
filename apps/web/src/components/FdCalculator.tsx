@@ -121,7 +121,7 @@ export function FdCalculator() {
                     htmlFor="amount"
                     className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
                   >
-                    Amount
+                    Amount(₹3Cr Max)
                   </Label>
                   <div className="relative mt-2">
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 font-display text-3xl text-muted-foreground">
