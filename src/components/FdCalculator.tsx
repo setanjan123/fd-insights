@@ -242,60 +242,26 @@ export function FdCalculator() {
 
                 {/* Banks */}
                 <div>
-                  <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Banks
-                  </Label>
-                  <div className="mt-2 space-y-1.5">
-                    {BANKS.map((b) => {
-                      const active = selectedBanks.includes(b.id);
-                      return (
-                        <button
-                          key={b.id}
-                          type="button"
-                          onClick={() => toggleBank(b.id)}
-                          className={cn(
-                            "w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition-all group",
-                            active
-                              ? "border-foreground/15 bg-muted/60"
-                              : "border-border bg-card hover:bg-muted/30",
-                          )}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <span
-                              className={cn(
-                                "h-4 w-4 rounded-md border flex items-center justify-center transition-all",
-                                active
-                                  ? "bg-foreground border-foreground"
-                                  : "border-border group-hover:border-foreground/40",
-                              )}
-                            >
-                              {active && (
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 12 12"
-                                  fill="none"
-                                  className="text-background"
-                                >
-                                  <path
-                                    d="M2 6.5L4.5 9L10 3"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </span>
-                            <span className="font-medium">{b.shortName}</span>
-                          </div>
-                          <span className="text-[11px] text-muted-foreground">
-                            {b.name}
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      Banks
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedBanks(
+                          selectedBanks.length === BANKS.length ? [] : ALL_BANK_IDS,
+                        )
+                      }
+                      className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {selectedBanks.length === BANKS.length ? "Clear" : "Select all"}
+                    </button>
                   </div>
+                  <BankMultiSelect
+                    selected={selectedBanks}
+                    onChange={setSelectedBanks}
+                  />
                 </div>
               </div>
             </div>
