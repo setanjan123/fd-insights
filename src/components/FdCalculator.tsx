@@ -301,32 +301,68 @@ export function FdCalculator() {
                           Best return
                         </div>
                         <p className="text-sm opacity-70">{best.bankName}</p>
-                        <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums">
-                          {formatINR(best.maturityAmount)}
-                        </h2>
-                        <p className="text-xs opacity-60 mt-3 tabular-nums">
-                          {tenureLabel} · {best.rate.toFixed(2)}% p.a. ·{" "}
-                          {payoutType === "cumulative" ? "Cumulative" : "Payout"}
-                          {isSenior && " · Senior"}
-                        </p>
+                        {payoutType === "non-cumulative" ? (
+                          <>
+                            <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums text-success">
+                              {formatINR(best.quarterlyPayout)}
+                            </h2>
+                            <p className="text-xs opacity-70 mt-2">
+                              every quarter · {best.numPayouts} payout
+                              {best.numPayouts !== 1 ? "s" : ""} over {tenureLabel}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h2 className="font-display text-5xl sm:text-6xl mt-1 leading-none tabular-nums">
+                              {formatINR(best.maturityAmount)}
+                            </h2>
+                            <p className="text-xs opacity-60 mt-3 tabular-nums">
+                              {tenureLabel} · {best.rate.toFixed(2)}% p.a. · Cumulative
+                              {isSenior && " · Senior"}
+                            </p>
+                          </>
+                        )}
                       </div>
                       <div className="flex gap-8 text-right">
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wider opacity-60">
-                            Interest
-                          </p>
-                          <p className="font-display text-2xl mt-1 tabular-nums text-success">
-                            +{formatINRCompact(best.totalInterest)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wider opacity-60">
-                            EAR
-                          </p>
-                          <p className="font-display text-2xl mt-1 tabular-nums">
-                            {best.effectiveAnnualReturn.toFixed(2)}%
-                          </p>
-                        </div>
+                        {payoutType === "non-cumulative" ? (
+                          <>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Rate
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {best.rate.toFixed(2)}%
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Principal back
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {formatINRCompact(amount)}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                Interest
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums text-success">
+                                +{formatINRCompact(best.totalInterest)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">
+                                EAR
+                              </p>
+                              <p className="font-display text-2xl mt-1 tabular-nums">
+                                {best.effectiveAnnualReturn.toFixed(2)}%
+                              </p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
