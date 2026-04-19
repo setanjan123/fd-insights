@@ -167,10 +167,10 @@ export function FdCalculator() {
                       Tenure
                     </Label>
                     <span className="text-[11px] tabular-nums text-muted-foreground">
-                      {totalMonths} months
+                      {totalDays} {totalDays === 1 ? "day" : "days"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-3 gap-2 mt-2">
                     <NumberStepper
                       value={years}
                       min={0}
@@ -184,6 +184,13 @@ export function FdCalculator() {
                       max={11}
                       onChange={setMonths}
                       suffix="mo"
+                    />
+                    <NumberStepper
+                      value={days}
+                      min={0}
+                      max={29}
+                      onChange={setDays}
+                      suffix="d"
                     />
                   </div>
                 </div>
