@@ -75,9 +75,9 @@ export function FdCalculator() {
               ₹
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-sm font-semibold tracking-tight">Fixed</span>
+              <span className="text-sm font-semibold tracking-tight">FD</span>
               <span className="font-display text-base italic text-muted-foreground">
-                deposit
+                Insights
               </span>
             </div>
           </div>
