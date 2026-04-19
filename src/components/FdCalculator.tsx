@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BANKS } from "@/lib/banks";
+import { BANKS, LAST_UPDATED } from "@/lib/banks";
 import { calculateFd, formatINR, formatINRCompact, formatTenure, type PayoutType } from "@/lib/fd";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,7 +84,7 @@ export function FdCalculator() {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="hidden sm:inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              Rates · Apr 2026
+              Rates · {new Date(LAST_UPDATED).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </span>
           </div>
         </div>
@@ -93,10 +93,6 @@ export function FdCalculator() {
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
         {/* Hero */}
         <section className="max-w-3xl mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur px-3 py-1 text-[11px] font-medium text-muted-foreground mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Compare 4 banks · Updated quarterly
-          </div>
           <h1 className="font-display text-5xl sm:text-7xl leading-[0.95] tracking-tight">
             Find the <em className="text-success">best</em> fixed
             <br />
@@ -136,8 +132,12 @@ export function FdCalculator() {
                       type="number"
                       inputMode="numeric"
                       min={1000}
+                      max={29999999}
                       value={amount || ""}
-                      onChange={(e) => setAmount(Number(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        setAmount(Math.min(29999999, val));
+                      }}
                       className="pl-8 pr-2 h-12 text-3xl font-semibold tabular-nums border-0 border-b border-border rounded-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-foreground transition-colors"
                     />
                   </div>

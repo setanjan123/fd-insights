@@ -30,10 +30,6 @@ const DAYS_PER_YEAR = 365;
 const DAYS_PER_MONTH = 30;
 const DAYS_PER_QUARTER = 91; // ~365/4
 
-export function daysToMonths(days: number): number {
-  return Math.max(1, Math.round(days / DAYS_PER_MONTH));
-}
-
 /**
  * Cumulative FD: compounded quarterly.
  *   A = P * (1 + r/4)^(4t)   where t = years
@@ -42,8 +38,7 @@ export function daysToMonths(days: number): number {
  *   Total interest ≈ P * r * t
  */
 export function calculateFd(bank: Bank, input: FdInput): FdResult {
-  const months = daysToMonths(input.totalDays);
-  const rate = getRateForTenure(bank, months, input.isSenior);
+  const rate = getRateForTenure(bank, input.totalDays, input.isSenior);
   const years = input.totalDays / DAYS_PER_YEAR;
 
   if (!rate || input.principal <= 0 || input.totalDays <= 0) {
