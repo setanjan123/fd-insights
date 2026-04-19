@@ -482,14 +482,18 @@ export function FdCalculator() {
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                          Interest earned
+                          {payoutType === "non-cumulative"
+                            ? "Quarterly payout"
+                            : "Interest earned"}
                         </h3>
                         <p className="text-sm mt-1">
                           On{" "}
                           <span className="font-medium tabular-nums">
                             {formatINR(amount)}
                           </span>{" "}
-                          over {tenureLabel}
+                          {payoutType === "non-cumulative"
+                            ? "· paid every quarter"
+                            : `over ${tenureLabel}`}
                         </p>
                       </div>
                       {worst && best && worst.rate && best.rate && (
@@ -498,7 +502,12 @@ export function FdCalculator() {
                             Spread
                           </p>
                           <p className="font-display text-xl tabular-nums text-success">
-                            +{formatINRCompact(best.totalInterest - worst.totalInterest)}
+                            +
+                            {formatINRCompact(
+                              payoutType === "non-cumulative"
+                                ? best.quarterlyPayout - worst.quarterlyPayout
+                                : best.totalInterest - worst.totalInterest,
+                            )}
                           </p>
                         </div>
                       )}
@@ -510,7 +519,11 @@ export function FdCalculator() {
                             .filter((r) => r.rate)
                             .map((r) => ({
                               name: r.shortName,
-                              interest: Math.round(r.totalInterest),
+                              value: Math.round(
+                                payoutType === "non-cumulative"
+                                  ? r.quarterlyPayout
+                                  : r.totalInterest,
+                              ),
                               isBest: r.bankId === best?.bankId,
                             }))}
                           margin={{ top: 16, right: 8, bottom: 0, left: 8 }}
@@ -547,9 +560,12 @@ export function FdCalculator() {
                               fontSize: "12px",
                               boxShadow: "var(--shadow-elevated)",
                             }}
-                            formatter={(value: number) => [formatINR(value), "Interest"]}
+                            formatter={(value: number) => [
+                              formatINR(value),
+                              payoutType === "non-cumulative" ? "Per quarter" : "Interest",
+                            ]}
                           />
-                          <Bar dataKey="interest" radius={[8, 8, 0, 0]}>
+                          <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                             {results
                               .filter((r) => r.rate)
                               .map((r) => (
