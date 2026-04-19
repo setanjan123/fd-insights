@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { BANKS } from "@/lib/banks";
-import { calculateFd, formatINR, formatINRCompact, type PayoutType } from "@/lib/fd";
+import { calculateFd, formatINR, formatINRCompact, formatTenure, type PayoutType } from "@/lib/fd";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -23,24 +23,29 @@ export function FdCalculator() {
   const [amount, setAmount] = useState<number>(100000);
   const [years, setYears] = useState<number>(2);
   const [months, setMonths] = useState<number>(0);
+  const [days, setDays] = useState<number>(0);
   const [payoutType, setPayoutType] = useState<PayoutType>("cumulative");
   const [isSenior, setIsSenior] = useState<boolean>(false);
   const [selectedBanks, setSelectedBanks] = useState<string[]>(ALL_BANK_IDS);
 
-  const totalMonths = Math.max(1, years * 12 + months);
+  const totalDays = Math.max(1, years * 365 + months * 30 + days);
 
   const results = useMemo(() => {
     return BANKS.filter((b) => selectedBanks.includes(b.id))
       .map((b) =>
         calculateFd(b, {
           principal: amount,
-          totalMonths,
+          totalDays,
           payoutType,
           isSenior,
         }),
       )
-      .sort((a, b) => b.maturityAmount - a.maturityAmount);
-  }, [amount, totalMonths, payoutType, isSenior, selectedBanks]);
+      .sort((a, b) =>
+        payoutType === "non-cumulative"
+          ? b.quarterlyPayout - a.quarterlyPayout
+          : b.maturityAmount - a.maturityAmount,
+      );
+  }, [amount, totalDays, payoutType, isSenior, selectedBanks]);
 
   const best = results[0];
   const worst = results[results.length - 1];
@@ -51,12 +56,7 @@ export function FdCalculator() {
     );
   };
 
-  const tenureLabel =
-    years > 0 && months > 0
-      ? `${years}y ${months}m`
-      : years > 0
-        ? `${years} year${years > 1 ? "s" : ""}`
-        : `${months} month${months > 1 ? "s" : ""}`;
+  const tenureLabel = formatTenure(totalDays);
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
