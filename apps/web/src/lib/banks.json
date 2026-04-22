@@ -243,8 +243,8 @@
     },
     {
       "id": "idb",
-      "name": "IDB",
-      "shortName": "IDB",
+      "name": "Indian Bank",
+      "shortName": "IndBank",
       "accent": "var(--chart-4)",
       "slabs": [
         {
