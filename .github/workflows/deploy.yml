@@ -4,11 +4,6 @@ on:
   # Trigger the workflow on push to the main branch
   push:
     branches: ["main"]
-  # Also trigger automatically when the scraper cron job finishes
-  workflow_run:
-    workflows: ["Update FD Rates"]
-    types:
-      - completed
   # Also allow manual trigger for testing
   workflow_dispatch:
 
