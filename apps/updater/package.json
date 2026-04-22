@@ -7,12 +7,14 @@
     "update": "tsx src/updater.ts",
     "update:hdfc": "tsx src/updater.ts --bank hdfc",
     "update:icici": "tsx src/updater.ts --bank icici",
-    "update:sbi": "tsx src/updater.ts --bank sbi"
+    "update:sbi": "tsx src/updater.ts --bank sbi",
+    "update:idb": "tsx src/updater.ts --bank idb"
   },
   "dependencies": {
     "cheerio": "^1.0.0"
   },
   "devDependencies": {
+    "playwright": "^1.52.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2",
     "@types/node": "^20.11.24"

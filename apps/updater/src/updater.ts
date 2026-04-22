@@ -8,6 +8,16 @@ const BANKS_JSON_PATH = path.resolve(
   "../web/src/lib/banks.json"
 );
 
+function createMissingBankEntry(bankId: string, slabs: unknown[]) {
+  return {
+    id: bankId,
+    name: bankId.toUpperCase(),
+    shortName: bankId.toUpperCase(),
+    accent: "var(--chart-4)",
+    slabs,
+  };
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -53,10 +63,11 @@ async function main() {
       if (bankIndex >= 0) {
         banksData.banks[bankIndex].slabs = slabs;
         console.log(`[OK] Successfully merged ${slabs.length} slabs for ${bankId}`);
-        hasUpdates = true;
       } else {
-        console.warn(`[WARN] Bank ID '${bankId}' not found in banks.json. Skipping.`);
+        banksData.banks.push(createMissingBankEntry(bankId, slabs));
+        console.log(`[OK] Added new bank '${bankId}' with ${slabs.length} slabs`);
       }
+      hasUpdates = true;
     } else if (result.status === "rejected") {
       console.error(`[ERROR] Scraper failed:\n`, result.reason);
     }
