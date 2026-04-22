@@ -2,62 +2,6 @@
   "lastUpdated": "2026-04-22",
   "banks": [
     {
-      "id": "sbi",
-      "name": "State Bank of India",
-      "shortName": "SBI",
-      "accent": "var(--chart-1)",
-      "slabs": [
-        {
-          "minDays": 7,
-          "maxDays": 45,
-          "regular": 3.05,
-          "senior": 3.55
-        },
-        {
-          "minDays": 46,
-          "maxDays": 179,
-          "regular": 4.9,
-          "senior": 5.4
-        },
-        {
-          "minDays": 180,
-          "maxDays": 210,
-          "regular": 5.65,
-          "senior": 6.15
-        },
-        {
-          "minDays": 211,
-          "maxDays": 364,
-          "regular": 5.9,
-          "senior": 6.4
-        },
-        {
-          "minDays": 365,
-          "maxDays": 729,
-          "regular": 6.25,
-          "senior": 6.75
-        },
-        {
-          "minDays": 730,
-          "maxDays": 1094,
-          "regular": 6.4,
-          "senior": 6.9
-        },
-        {
-          "minDays": 1095,
-          "maxDays": 1824,
-          "regular": 6.3,
-          "senior": 6.8
-        },
-        {
-          "minDays": 1825,
-          "maxDays": 3650,
-          "regular": 6.05,
-          "senior": 7.05
-        }
-      ]
-    },
-    {
       "id": "hdfc",
       "name": "HDFC Bank",
       "shortName": "HDFC",
