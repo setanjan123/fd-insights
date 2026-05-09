@@ -1,27 +1,84 @@
 import type { BankScraper, ParsedSlab } from "../lib/types.js";
-import { fetchHtml } from "../lib/fetch.js";
+import { withBrowserPage } from "../lib/browser.js";
 import { parseTenure } from "../lib/tenure.js";
 import { parseRate } from "../lib/rates.js";
-import { extractTableRows } from "../lib/table.js";
+
+const EXPECTED_FIRST_TENURE = "7 - 14 days";
+
+function normalizeWhitespace(text: string): string {
+  return text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+}
 
 export class HdfcScraper implements BankScraper {
   bankId = "hdfc";
   url = "https://www.hdfc.bank.in/fixed-deposit/fd-interest-rate";
 
   async scrape(): Promise<ParsedSlab[]> {
-    console.log(`[${this.bankId}] Fetching page: ${this.url}`);
-    const $ = await fetchHtml(this.url);
+    console.log(`[${this.bankId}] Fetching page with Playwright: ${this.url}`);
 
-    // Use table:first to grab the absolute first table on the page
-    const rawRows = extractTableRows($, "table:first tr");
+    const rawRows = await withBrowserPage(this.url, async (page) => {
+      await page.waitForFunction(
+        () =>
+          (document.body?.innerText ?? "")
+            .toLowerCase()
+            .includes("fixed deposit interest rate less than"),
+        { timeout: 20_000 },
+      );
 
-    if (rawRows.length === 0) {
+      return page.evaluate(() => {
+        const tables = Array.from(document.querySelectorAll("table"));
+
+        const candidate = tables.find((table) => {
+          const text = (table.textContent ?? "")
+            .replace(/\u00a0/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+          return (
+            text.includes("interest rate (per annum)") &&
+            text.includes("senior citizen rates") &&
+            text.includes("7 - 14 days")
+          );
+        });
+
+        if (!candidate) {
+          return [];
+        }
+
+        return Array.from(candidate.querySelectorAll("tr")).flatMap((row) => {
+          const cells = Array.from(row.querySelectorAll("td")).map((cell) =>
+            (cell.textContent ?? "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim(),
+          );
+
+          if (cells.length < 3 || !cells[0] || !cells[1] || !cells[2]) {
+            return [];
+          }
+
+          if (cells[0].toLowerCase().includes("tenor")) {
+            return [];
+          }
+
+          return [{ tenure: cells[0], regular: cells[1], senior: cells[2] }];
+        });
+      });
+    });
+
+    const dedupedRows = rawRows.filter(
+      (row, index, array) =>
+        array.findIndex((candidate) => candidate.tenure === row.tenure) === index,
+    );
+
+    if (dedupedRows.length === 0) {
       throw new Error(`[${this.bankId}] Found zero valid table rows.`);
     }
 
-    console.log(`[${this.bankId}] Found ${rawRows.length} potential rows. Processing...`);
+    if (normalizeWhitespace(dedupedRows[0]!.tenure).toLowerCase() !== EXPECTED_FIRST_TENURE.toLowerCase()) {
+      throw new Error(`[${this.bankId}] Table validation failed: expected first tenure "${EXPECTED_FIRST_TENURE}".`);
+    }
 
-    const parsedSlabs: ParsedSlab[] = rawRows.map((row) => {
+    console.log(`[${this.bankId}] Found ${dedupedRows.length} potential rows. Processing...`);
+
+    const parsedSlabs: ParsedSlab[] = dedupedRows.map((row) => {
       try {
         return {
           ...parseTenure(row.tenure),

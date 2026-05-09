@@ -1,6 +1,5 @@
-import * as cheerio from "cheerio";
-import { chromium } from "playwright";
 import type { BankScraper, ParsedSlab } from "../lib/types.js";
+import { withBrowserPage } from "../lib/browser.js";
 import { parseTenure } from "../lib/tenure.js";
 import { parseRate } from "../lib/rates.js";
 
@@ -51,25 +50,6 @@ function getSeniorRate(regularRate: number, slab: { minDays: number; maxDays: nu
   return Number((regularRate + 0.5).toFixed(2));
 }
 
-function extractTopRetailTable($: cheerio.CheerioAPI) {
-  const table = $(".mainContent table")
-    .toArray()
-    .find((node) => {
-      const tableText = normalizeWhitespace($(node).text()).toLowerCase();
-      return (
-        tableText.includes("interest rates on domestic retail term deposits") &&
-        tableText.includes("less than rs.3 crore") &&
-        tableText.includes("revised rate")
-      );
-    });
-
-  if (!table) {
-    throw new Error("[idb] Could not find the top retail deposit table for less than Rs.3 crore.");
-  }
-
-  return table;
-}
-
 function isChallengePage(title: string, bodyText: string): boolean {
   const lowerTitle = title.toLowerCase();
   const lowerBody = bodyText.toLowerCase();
@@ -82,56 +62,6 @@ function isChallengePage(title: string, bodyText: string): boolean {
   );
 }
 
-async function loadIdbHtml(url: string): Promise<string> {
-  const browser = await chromium.launch({
-    headless: true,
-  });
-
-  const context = await browser.newContext({
-    locale: "en-US",
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    viewport: {
-      width: 1440,
-      height: 1400,
-    },
-  });
-
-  const page = await context.newPage();
-
-  try {
-    await page.goto(url, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-    });
-
-    await page.waitForFunction(
-      () => {
-        const text = document.body?.innerText?.toLowerCase() ?? "";
-
-        return (
-          text.includes("interest rates on domestic retail term deposits") ||
-          text.includes("support id is:") ||
-          text.includes("testing whether you are a human visitor")
-        );
-      },
-      { timeout: 20000 }
-    );
-
-    const title = await page.title();
-    const bodyText = normalizeWhitespace(await page.locator("body").innerText());
-
-    if (isChallengePage(title, bodyText)) {
-      throw new Error("[idb] Playwright reached the site, but the bank still served an anti-bot challenge page.");
-    }
-
-    return await page.content();
-  } finally {
-    await context.close();
-    await browser.close();
-  }
-}
-
 export class IdScraper implements BankScraper {
   bankId = "idb";
   url = "https://indianbank.bank.in/departments/deposit-rates/";
@@ -139,36 +69,82 @@ export class IdScraper implements BankScraper {
   async scrape(): Promise<ParsedSlab[]> {
     console.log(`[${this.bankId}] Fetching page with Playwright: ${this.url}`);
 
-    const html = await loadIdbHtml(this.url);
-    const $ = cheerio.load(html);
-    const table = extractTopRetailTable($);
-    const parsedSlabs: ParsedSlab[] = [];
+    const rawRows = await withBrowserPage(this.url, async (page) => {
+      await page.waitForFunction(
+        () => {
+          const text = document.body?.innerText?.toLowerCase() ?? "";
+          return (
+            text.includes("interest rates on domestic retail term deposits") ||
+            text.includes("support id is:") ||
+            text.includes("testing whether you are a human visitor")
+          );
+        },
+        { timeout: 20_000 },
+      );
 
-    $(table)
-      .find("tr")
-      .each((_, rowNode) => {
-        const columns = $(rowNode).find("td");
+      const title = await page.title();
+      const bodyText = normalizeWhitespace(await page.locator("body").innerText());
 
-        if (columns.length < 3) {
-          return;
+      if (isChallengePage(title, bodyText)) {
+        throw new Error("[idb] Playwright reached the site, but the bank still served an anti-bot challenge page.");
+      }
+
+      const rows = await page.evaluate(() => {
+        const tables = Array.from(document.querySelectorAll(".mainContent table"));
+
+        const candidate = tables.find((table) => {
+          const text = (table.textContent ?? "")
+            .replace(/\u00a0/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+          return (
+            text.includes("interest rates on domestic retail term deposits") &&
+            text.includes("less than rs.3 crore") &&
+            text.includes("revised rate")
+          );
+        });
+
+        if (!candidate) {
+          return [];
         }
 
-        const tenureText = normalizeWhitespace($(columns[0]).text());
-        const revisedRateText = normalizeWhitespace($(columns[2]).text());
+        return Array.from(candidate.querySelectorAll("tr")).flatMap((row) => {
+          const cells = Array.from(row.querySelectorAll("td")).map((cell) =>
+            (cell.textContent ?? "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim(),
+          );
 
-        if (!tenureText || !revisedRateText || tenureText.toLowerCase().includes("period / tenor")) {
-          return;
-        }
+          if (cells.length < 3 || !cells[0] || !cells[2]) {
+            return [];
+          }
 
-        const slab = parseIdbTenure(tenureText);
-        const regular = parseRate(revisedRateText);
+          if (cells[0].toLowerCase().includes("period / tenor")) {
+            return [];
+          }
 
-        parsedSlabs.push({
-          ...slab,
-          regular,
-          senior: getSeniorRate(regular, slab),
+          return [{ tenure: cells[0], revisedRate: cells[2] }];
         });
       });
+
+      if (rows.length === 0) {
+        throw new Error("[idb] Could not find the top retail deposit table for less than Rs.3 crore.");
+      }
+
+      return rows;
+    });
+
+    const parsedSlabs: ParsedSlab[] = [];
+
+    for (const row of rawRows) {
+      const slab = parseIdbTenure(row.tenure);
+      const regular = parseRate(row.revisedRate);
+
+      parsedSlabs.push({
+        ...slab,
+        regular,
+        senior: getSeniorRate(regular, slab),
+      });
+    }
 
     if (parsedSlabs.length === 0) {
       throw new Error("[idb] Did not extract any valid rate slabs from the top retail table.");

@@ -10,9 +10,7 @@
     "update:sbi": "tsx src/updater.ts --bank sbi",
     "update:idb": "tsx src/updater.ts --bank idb"
   },
-  "dependencies": {
-    "cheerio": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "playwright": "^1.52.0",
     "tsx": "^4.7.1",

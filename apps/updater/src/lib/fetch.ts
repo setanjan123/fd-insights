@@ -1,5 +1,3 @@
-import * as cheerio from "cheerio";
-
 const DEFAULT_RETRIES = 2;
 const RETRYABLE_STATUS_CODES = new Set([403, 408, 425, 429, 500, 502, 503, 504]);
 
@@ -121,26 +119,6 @@ async function fetchWithPolicy(url: string, accept: string, retries: number): Pr
     await sleep(delayMs);
     return fetchWithPolicy(url, accept, retries - 1);
   }
-}
-
-/**
- * Fetches HTML from a URL and loads it into a cheerio instance.
- * @param url The URL to load HTML from
- * @param retries Number of retries on failure
- * @returns CheerioAPI instance
- */
-export async function fetchHtml(
-  url: string,
-  retries = DEFAULT_RETRIES,
-): Promise<cheerio.CheerioAPI> {
-  const response = await fetchWithPolicy(
-    url,
-    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-    retries,
-  );
-
-  const html = await response.text();
-  return cheerio.load(html);
 }
 
 /**

@@ -5,11 +5,19 @@ This workspace contains automated scrapers to fetch the latest Fixed Deposit (FD
 ## Features
 
 - **Multi-Bank Architecture**: Modular scrapers for each bank using a shared `BankScraper` interface.
-- **Cheerio + Fetch**: Fast, lightweight HTML extraction for server-rendered response pages without the overhead of complete headless browsers.
+- **Playwright + Fetch**: Browser-backed HTML extraction for JS-heavy or bot-protected pages, with native `fetch()` for JSON feeds.
 - **Tenure Parser**: Handles all variations of tenure strings (like `6 months 1 day <= 9 months`, `7 - 14 days`).
 - **Parallel Scraper Execution**: Scrapes multiple banks independently simultaneously.
 - **Fail-safe Logic**: If one bank scraper breaks, other banks are successfully preserved and updated.
 - **Zero Config**: Executes with `tsx` out-of-the-box.
+
+## Setup
+
+Install Chromium once before running HTML scrapers locally:
+
+```bash
+npx playwright install chromium
+```
 
 ## Usage
 

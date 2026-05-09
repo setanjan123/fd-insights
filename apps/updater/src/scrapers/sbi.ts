@@ -1,59 +1,65 @@
 import type { BankScraper, ParsedSlab } from "../lib/types.js";
-import { fetchHtml } from "../lib/fetch.js";
+import { withBrowserPage } from "../lib/browser.js";
 import { parseTenure } from "../lib/tenure.js";
 import { parseRate } from "../lib/rates.js";
+
+const EXPECTED_FIRST_TENURE = "7 days to 45 days";
 
 export class SbiScraper implements BankScraper {
   bankId = "sbi";
   url = "https://sbi.bank.in/web/interest-rates/deposit-rates/retail-domestic-term-deposits";
 
   async scrape(): Promise<ParsedSlab[]> {
-    console.log(`[${this.bankId}] Fetching page: ${this.url}`);
-    const $ = await fetchHtml(this.url);
+    console.log(`[${this.bankId}] Fetching page with Playwright: ${this.url}`);
 
-    // Target the table specifically matching 'menu_0' representing the 'Below Rs. 3 crore' table
-    const tableRows = $("#menu_0 table tr");
+    const rawRows = await withBrowserPage(this.url, async (page) => {
+      await page.waitForSelector("#menu_0 table", { timeout: 20_000 });
 
-    if (tableRows.length === 0) {
+      return page.$$eval("#menu_0 table tr", (rows) => {
+        return rows.flatMap((row) => {
+          const cells = Array.from(row.querySelectorAll("td")).map((cell) =>
+            (cell.textContent ?? "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim(),
+          );
+
+          // [0] Tenors, [1] Existing Public, [2] Revised Public, [3] Existing Senior, [4] Revised Senior
+          if (cells.length < 5) {
+            return [];
+          }
+
+          if (!cells[0] || !cells[2] || !cells[4] || cells[0].toLowerCase().includes("tenor")) {
+            return [];
+          }
+
+          return [{ tenure: cells[0], regular: cells[2], senior: cells[4] }];
+        });
+      });
+    });
+
+    if (rawRows.length === 0) {
       throw new Error(`[${this.bankId}] Found zero valid table rows.`);
     }
 
-    console.log(`[${this.bankId}] Found ${tableRows.length} potential rows in table. Processing...`);
+    if (rawRows[0]!.tenure.toLowerCase() !== EXPECTED_FIRST_TENURE.toLowerCase()) {
+      throw new Error(`[${this.bankId}] Table validation failed: expected first tenure "${EXPECTED_FIRST_TENURE}".`);
+    }
+
+    console.log(`[${this.bankId}] Found ${rawRows.length} potential rows in table. Processing...`);
 
     const parsedSlabs: ParsedSlab[] = [];
-
-    tableRows.each((_, rowNode) => {
-      const columns = $(rowNode).find("td");
-
-      // The SBI target table has 5 distinct cells for data rows:
-      // [0] Tenors, [1] Existing Public, [2] Revised Public, [3] Existing Senior, [4] Revised Senior
-      if (columns.length >= 5) {
-        const tenureText = $(columns[0]).text().trim();
-        const revisedRegularText = $(columns[2]).text().trim();
-        const revisedSeniorText = $(columns[4]).text().trim();
-
-        // Extra guard clause if it happens to be a structural/sub-header row that contains 5 columns
-        if (
-          tenureText &&
-          revisedRegularText &&
-          revisedSeniorText &&
-          !tenureText.toLowerCase().includes("tenor")
-        ) {
-          try {
-            parsedSlabs.push({
-              ...parseTenure(tenureText),
-              regular: parseRate(revisedRegularText),
-              senior: parseRate(revisedSeniorText),
-            });
-          } catch (err: any) {
-            throw new Error(`[${this.bankId}] Row parsing error for "${tenureText}": ${err.message}`);
-          }
-        }
+    for (const row of rawRows) {
+      try {
+        parsedSlabs.push({
+          ...parseTenure(row.tenure),
+          regular: parseRate(row.regular),
+          senior: parseRate(row.senior),
+        });
+      } catch (err: any) {
+        throw new Error(`[${this.bankId}] Row parsing error for "${row.tenure}": ${err.message}`);
       }
-    });
+    }
 
     if (parsedSlabs.length === 0) {
-       throw new Error(`[${this.bankId}] Did not extract any valid rate slabs from table.`);
+      throw new Error(`[${this.bankId}] Did not extract any valid rate slabs from table.`);
     }
 
     return parsedSlabs;

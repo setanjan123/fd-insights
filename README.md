@@ -9,7 +9,7 @@ The project operates entirely statelessly via GitHub Pages. Instead of relying o
 This project is a monorepo containing two distinct workspaces:
 
 - `apps/web`: A Vite + React static single-page application containing the calculator UI and visualizations.
-- `apps/updater`: A modular Node.js scraping execution layer utilizing `cheerio` to fetch and parse the latest FD slabs from official bank websites.
+- `apps/updater`: A modular Node.js scraping execution layer utilizing Playwright for browser-backed FD slab extraction and native `fetch()` for JSON endpoints.
 
 The two environments are decoupled. The only bridge between them is the `apps/web/src/lib/banks.json` file. The `updater` modifies this JSON file, and the `web` app simply reads from it at build time.
 
@@ -58,10 +58,10 @@ npm run update:hdfc --workspace=updater
 
 1. Navigate to `apps/updater/src/scrapers/`.
 2. Implement the `BankScraper` interface in a new file (e.g. `sbi.ts`).
-3. Leverage the shared `fetchHtml`, `parseTenure`, `parseRate`, and `extractTableRows` utilities provided in `apps/updater/src/lib`.
+3. Leverage the shared Playwright browser helper plus `parseTenure` and `parseRate` utilities in `apps/updater/src/lib`.
 4. Export your new scraper class inside `apps/updater/src/scrapers/index.ts`. Next time the batch job triggers, it will run your code in parallel!
 
 ## 🧩 Tech Stack
 - **Frontend**: React, TailwindCSS, Vite
-- **Scraper**: Cheerio, native `fetch()`, `tsx`
+- **Scraper**: Playwright, native `fetch()`, `tsx`
 - **Automation**: GitHub Actions (Cron), GitHub Pages
