@@ -2,6 +2,8 @@ import type { BankScraper, ParsedSlab } from "../lib/types.js";
 import { fetchJson } from "../lib/fetch.js";
 import { parseTenure } from "../lib/tenure.js";
 
+type FetchJsonFn = typeof fetchJson;
+
 /** Shape of each entry in the ICICI FD interest rate JSON */
 type IciciRateEntry = {
   tenure: string;
@@ -25,12 +27,14 @@ const EXPECTED_FIRST_TENURE = "7 to 45 Days";
 const SKIP_TENURES = new Set(["5Y (Tax Saver FD)"]);
 
 export class IciciScraper implements BankScraper {
+  constructor(private readonly fetchJsonFn: FetchJsonFn = fetchJson) {}
+
   bankId = "icici";
   url = JSON_URL;
 
   async scrape(): Promise<ParsedSlab[]> {
     console.log(`[${this.bankId}] Fetching JSON: ${this.url}`);
-    const json = await fetchJson<IciciRateJson>(this.url);
+    const json = await this.fetchJsonFn<IciciRateJson>(this.url);
 
     const lessThan3Cr = json.interestData[0];
 

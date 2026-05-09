@@ -3,6 +3,8 @@ import { withBrowserPage } from "../lib/browser.js";
 import { parseTenure } from "../lib/tenure.js";
 import { parseRate } from "../lib/rates.js";
 
+type WithBrowserPageFn = typeof withBrowserPage;
+
 const EXPECTED_FIRST_TENURE = "7 - 14 days";
 
 function normalizeWhitespace(text: string): string {
@@ -10,13 +12,15 @@ function normalizeWhitespace(text: string): string {
 }
 
 export class HdfcScraper implements BankScraper {
+  constructor(private readonly withBrowserPageFn: WithBrowserPageFn = withBrowserPage) {}
+
   bankId = "hdfc";
   url = "https://www.hdfc.bank.in/fixed-deposit/fd-interest-rate";
 
   async scrape(): Promise<ParsedSlab[]> {
     console.log(`[${this.bankId}] Fetching page with Playwright: ${this.url}`);
 
-    const rawRows = await withBrowserPage(this.url, async (page) => {
+    const rawRows = await this.withBrowserPageFn(this.url, async (page) => {
       await page.waitForFunction(
         () =>
           (document.body?.innerText ?? "")

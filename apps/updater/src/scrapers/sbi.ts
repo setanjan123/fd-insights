@@ -3,16 +3,20 @@ import { withBrowserPage } from "../lib/browser.js";
 import { parseTenure } from "../lib/tenure.js";
 import { parseRate } from "../lib/rates.js";
 
+type WithBrowserPageFn = typeof withBrowserPage;
+
 const EXPECTED_FIRST_TENURE = "7 days to 45 days";
 
 export class SbiScraper implements BankScraper {
+  constructor(private readonly withBrowserPageFn: WithBrowserPageFn = withBrowserPage) {}
+
   bankId = "sbi";
   url = "https://sbi.bank.in/web/interest-rates/deposit-rates/retail-domestic-term-deposits";
 
   async scrape(): Promise<ParsedSlab[]> {
     console.log(`[${this.bankId}] Fetching page with Playwright: ${this.url}`);
 
-    const rawRows = await withBrowserPage(this.url, async (page) => {
+    const rawRows = await this.withBrowserPageFn(this.url, async (page) => {
       await page.waitForSelector("#menu_0 table", { timeout: 20_000 });
 
       return page.$$eval("#menu_0 table tr", (rows) => {
