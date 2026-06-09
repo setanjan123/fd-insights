@@ -27,7 +27,7 @@ jobs:
         working-directory: apps/updater
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
         working-directory: apps/updater
         
       - name: Run scrapers
