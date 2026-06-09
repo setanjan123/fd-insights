@@ -18,6 +18,16 @@ function createMissingBankEntry(bankId: string, slabs: unknown[]) {
   };
 }
 
+async function writeGitHubOutput(name: string, value: string): Promise<void> {
+  const outputPath = process.env.GITHUB_OUTPUT;
+
+  if (!outputPath) {
+    return;
+  }
+
+  await fs.appendFile(outputPath, `${name}=${value}\n`, "utf-8");
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -52,8 +62,11 @@ async function main() {
   const banksData = JSON.parse(banksDataRaw);
 
   let hasUpdates = false;
+  const failedScrapers: string[] = [];
 
-  for (const result of results) {
+  for (const [index, result] of results.entries()) {
+    const scraperId = activeScrapers[index]?.bankId ?? `scraper-${index}`;
+
     // We only update JSON with successful resolutions containing actual slabs
     if (result.status === "fulfilled" && result.value.slabs.length > 0) {
       const { bankId, slabs } = result.value;
@@ -69,8 +82,22 @@ async function main() {
       }
       hasUpdates = true;
     } else if (result.status === "rejected") {
+      failedScrapers.push(scraperId);
       console.error(`[ERROR] Scraper failed:\n`, result.reason);
     }
+  }
+
+  const failureMode =
+    failedScrapers.length === 0
+      ? "none"
+      : failedScrapers.length === activeScrapers.length
+        ? "total"
+        : "partial";
+
+  if (failureMode === "partial") {
+    console.error(`[WARN] Partial scraper failures: ${failedScrapers.join(", ")}`);
+  } else if (failureMode === "total") {
+    console.error(`[ERROR] All scrapers failed: ${failedScrapers.join(", ")}`);
   }
 
   if (hasUpdates) {
@@ -86,6 +113,14 @@ async function main() {
   } else {
     console.log(`\nNo updates made.`);
   }
+
+  await writeGitHubOutput("has_updates", String(hasUpdates));
+  await writeGitHubOutput("failure_mode", failureMode);
+  await writeGitHubOutput("failed_count", String(failedScrapers.length));
+  await writeGitHubOutput("failed_scrapers", failedScrapers.join(","));
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

@@ -31,11 +31,20 @@ jobs:
         working-directory: apps/updater
         
       - name: Run scrapers
+        id: update
         run: npm run update
         working-directory: apps/updater
         
       - name: Commit and push changes
+        if: steps.update.outputs.has_updates == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update FD rates [automated]"
           file_pattern: apps/web/src/lib/banks.json
+
+      - name: Fail on scraper errors
+        if: steps.update.outputs.failure_mode != 'none'
+        run: |
+          echo "Scraper failure mode: ${{ steps.update.outputs.failure_mode }}"
+          echo "Failed scrapers: ${{ steps.update.outputs.failed_scrapers }}"
+          exit 1
