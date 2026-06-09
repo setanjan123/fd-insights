@@ -70,7 +70,8 @@ test("IdScraper maps special tenures and computes senior premium", async () => {
     { tenure: "7 days to 14 days", revisedRate: "3.00%" },
     { tenure: "1 year", revisedRate: "6.10%" },
     { tenure: "IND Secure (444 days)", revisedRate: "6.60%" },
-    { tenure: "IND Green (555 days)", revisedRate: "6.70%" },
+    { tenure: "IND Green (500 days)", revisedRate: "6.70%" },
+    { tenure: "IND Grow (555 days)", revisedRate: "6.80%" },
     {
       tenure: "Above 1 year to less than 2 years (except 444 & 555 days)",
       revisedRate: "6.20%",
@@ -84,7 +85,8 @@ test("IdScraper maps special tenures and computes senior premium", async () => {
     { minDays: 7, maxDays: 14, regular: 3, senior: 3.5 },
     { minDays: 365, maxDays: 365, regular: 6.1, senior: 6.6 },
     { minDays: 444, maxDays: 444, regular: 6.6, senior: 7.1 },
-    { minDays: 555, maxDays: 555, regular: 6.7, senior: 7.2 },
+    { minDays: 500, maxDays: 500, regular: 6.7, senior: 7.2 },
+    { minDays: 555, maxDays: 555, regular: 6.8, senior: 7.3 },
     { minDays: 366, maxDays: 729, regular: 6.2, senior: 6.7 },
     { minDays: 1826, maxDays: 3650, regular: 6, senior: 6.5 },
   ]);

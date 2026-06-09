@@ -19,12 +19,10 @@ function parseIdbTenure(text: string): { minDays: number; maxDays: number } {
     return { minDays: 365, maxDays: 365 };
   }
 
-  if (lower === "ind secure (444 days)") {
-    return { minDays: 444, maxDays: 444 };
-  }
-
-  if (lower === "ind green (555 days)") {
-    return { minDays: 555, maxDays: 555 };
+  const specialProductMatch = lower.match(/^ind\s+.+\((\d+)\s*days?\)$/);
+  if (specialProductMatch) {
+    const days = parseInt(specialProductMatch[1]!, 10);
+    return { minDays: days, maxDays: days };
   }
 
   if (lower === "above 1 year to less than 2 years (except 444 & 555 days)") {
