@@ -51,9 +51,7 @@ export function FdCalculator() {
   const worst = results[results.length - 1];
 
   const toggleBank = (id: string) => {
-    setSelectedBanks((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setSelectedBanks((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const tenureLabel = formatTenure(totalDays);
@@ -69,22 +67,36 @@ export function FdCalculator() {
 
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-md bg-background/70 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display text-lg">
-              ₹
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 sm:py-0 min-h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display text-lg">
+                ₹
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm font-semibold tracking-tight">FD</span>
+                <span className="font-display text-base italic text-muted-foreground">
+                  Insights
+                </span>
+              </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-sm font-semibold tracking-tight">FD</span>
-              <span className="font-display text-base italic text-muted-foreground">
-                Insights
-              </span>
-            </div>
+            <span className="inline-flex sm:hidden items-center gap-1.5 self-start rounded-full border border-border bg-card px-2.5 py-1 text-[11px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse shrink-0" />
+              Updated{" "}
+              {new Date(LAST_UPDATED).toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground sm:justify-end">
             <span className="hidden sm:inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              Rates · {new Date(LAST_UPDATED).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              Rates ·{" "}
+              {new Date(LAST_UPDATED).toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              })}
             </span>
           </div>
         </div>
@@ -99,8 +111,8 @@ export function FdCalculator() {
             deposit, in seconds.
           </h1>
           <p className="mt-5 text-base text-muted-foreground max-w-xl leading-relaxed">
-            A no-nonsense calculator that compares maturity value, interest, and
-            effective annual return across India's top banks — side by side.
+            A no-nonsense calculator that compares maturity value, interest, and effective annual
+            return across India's top banks — side by side.
           </p>
         </section>
 
@@ -171,13 +183,7 @@ export function FdCalculator() {
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 mt-2">
-                    <NumberStepper
-                      value={years}
-                      min={0}
-                      max={10}
-                      onChange={setYears}
-                      suffix="yr"
-                    />
+                    <NumberStepper value={years} min={0} max={10} onChange={setYears} suffix="yr" />
                     <NumberStepper
                       value={months}
                       min={0}
@@ -185,13 +191,7 @@ export function FdCalculator() {
                       onChange={setMonths}
                       suffix="mo"
                     />
-                    <NumberStepper
-                      value={days}
-                      min={0}
-                      max={29}
-                      onChange={setDays}
-                      suffix="d"
-                    />
+                    <NumberStepper value={days} min={0} max={29} onChange={setDays} suffix="d" />
                   </div>
                 </div>
 
@@ -218,9 +218,7 @@ export function FdCalculator() {
                     ))}
                   </div>
                   <p className="mt-1.5 text-[11px] text-muted-foreground">
-                    {payoutType === "cumulative"
-                      ? "Compounded quarterly"
-                      : "Simple interest"}
+                    {payoutType === "cumulative" ? "Compounded quarterly" : "Simple interest"}
                   </p>
                 </div>
 
@@ -247,19 +245,14 @@ export function FdCalculator() {
                     <button
                       type="button"
                       onClick={() =>
-                        setSelectedBanks(
-                          selectedBanks.length === BANKS.length ? [] : ALL_BANK_IDS,
-                        )
+                        setSelectedBanks(selectedBanks.length === BANKS.length ? [] : ALL_BANK_IDS)
                       }
                       className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {selectedBanks.length === BANKS.length ? "Clear" : "Select all"}
                     </button>
                   </div>
-                  <BankMultiSelect
-                    selected={selectedBanks}
-                    onChange={setSelectedBanks}
-                  />
+                  <BankMultiSelect selected={selectedBanks} onChange={setSelectedBanks} />
                 </div>
               </div>
             </div>
@@ -354,9 +347,7 @@ export function FdCalculator() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-[11px] uppercase tracking-wider opacity-60">
-                                EAR
-                              </p>
+                              <p className="text-[11px] uppercase tracking-wider opacity-60">EAR</p>
                               <p className="font-display text-2xl mt-1 tabular-nums">
                                 {best.effectiveAnnualReturn.toFixed(2)}%
                               </p>
@@ -385,25 +376,19 @@ export function FdCalculator() {
                     {results.map((r, i) => {
                       const isBest = r.bankId === best?.bankId;
                       const metric =
-                        payoutType === "non-cumulative"
-                          ? r.quarterlyPayout
-                          : r.totalInterest;
+                        payoutType === "non-cumulative" ? r.quarterlyPayout : r.totalInterest;
                       const bestMetric =
                         payoutType === "non-cumulative"
-                          ? best?.quarterlyPayout ?? 0
-                          : best?.totalInterest ?? 0;
+                          ? (best?.quarterlyPayout ?? 0)
+                          : (best?.totalInterest ?? 0);
                       const widthPct =
-                        bestMetric > 0
-                          ? Math.max(4, (metric / bestMetric) * 100)
-                          : 0;
+                        bestMetric > 0 ? Math.max(4, (metric / bestMetric) * 100) : 0;
                       const primary =
-                        payoutType === "non-cumulative"
-                          ? r.quarterlyPayout
-                          : r.maturityAmount;
+                        payoutType === "non-cumulative" ? r.quarterlyPayout : r.maturityAmount;
                       const bestPrimary =
                         payoutType === "non-cumulative"
-                          ? best?.quarterlyPayout ?? 0
-                          : best?.maturityAmount ?? 0;
+                          ? (best?.quarterlyPayout ?? 0)
+                          : (best?.maturityAmount ?? 0);
                       const diff = primary - bestPrimary;
 
                       return (
@@ -482,15 +467,10 @@ export function FdCalculator() {
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                          {payoutType === "non-cumulative"
-                            ? "Quarterly payout"
-                            : "Interest earned"}
+                          {payoutType === "non-cumulative" ? "Quarterly payout" : "Interest earned"}
                         </h3>
                         <p className="text-sm mt-1">
-                          On{" "}
-                          <span className="font-medium tabular-nums">
-                            {formatINR(amount)}
-                          </span>{" "}
+                          On <span className="font-medium tabular-nums">{formatINR(amount)}</span>{" "}
                           {payoutType === "non-cumulative"
                             ? "· paid every quarter"
                             : `over ${tenureLabel}`}
@@ -589,8 +569,7 @@ export function FdCalculator() {
             )}
 
             <p className="text-[11px] text-muted-foreground text-center pt-4">
-              Data may be inaccurate. Verify with your bank before
-              investing.
+              Data may be inaccurate. Verify with your bank before investing.
             </p>
           </section>
         </div>
@@ -639,4 +618,3 @@ function NumberStepper({
     </div>
   );
 }
-
