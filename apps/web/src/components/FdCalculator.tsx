@@ -66,7 +66,7 @@ export function FdCalculator() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-grid opacity-60" />
 
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-md bg-background/70 sticky top-0 z-20">
+      <header className="border-b border-border/50 bg-background sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 sm:py-0 min-h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
             <div className="flex items-center gap-2.5">
@@ -81,7 +81,7 @@ export function FdCalculator() {
               </div>
             </div>
             <span className="inline-flex sm:hidden items-center gap-1.5 self-start rounded-full border border-border bg-card px-2.5 py-1 text-[11px] text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse shrink-0" />
+              <span className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />
               Updated{" "}
               {new Date(LAST_UPDATED).toLocaleDateString("en-US", {
                 month: "short",
@@ -91,7 +91,7 @@ export function FdCalculator() {
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground sm:justify-end">
             <span className="hidden sm:inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
               Rates ·{" "}
               {new Date(LAST_UPDATED).toLocaleDateString("en-US", {
                 month: "short",
@@ -150,7 +150,7 @@ export function FdCalculator() {
                         const val = Number(e.target.value) || 0;
                         setAmount(Math.min(29999999, val));
                       }}
-                      className="pl-8 pr-2 h-12 text-3xl font-semibold tabular-nums border-0 border-b border-border rounded-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+                      className="pl-8 pr-2 h-12 text-3xl font-semibold tabular-nums border-0 border-b border-border rounded-none bg-transparent shadow-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:border-foreground transition-colors"
                     />
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -160,7 +160,7 @@ export function FdCalculator() {
                         type="button"
                         onClick={() => setAmount(v)}
                         className={cn(
-                          "px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all",
+                          "relative tap-target px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all",
                           amount === v
                             ? "bg-foreground text-background border-foreground"
                             : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
@@ -183,15 +183,30 @@ export function FdCalculator() {
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 mt-2">
-                    <NumberStepper value={years} min={0} max={10} onChange={setYears} suffix="yr" />
+                    <NumberStepper
+                      value={years}
+                      min={0}
+                      max={10}
+                      onChange={setYears}
+                      suffix="yr"
+                      label="years"
+                    />
                     <NumberStepper
                       value={months}
                       min={0}
                       max={11}
                       onChange={setMonths}
                       suffix="mo"
+                      label="months"
                     />
-                    <NumberStepper value={days} min={0} max={29} onChange={setDays} suffix="d" />
+                    <NumberStepper
+                      value={days}
+                      min={0}
+                      max={29}
+                      onChange={setDays}
+                      suffix="d"
+                      label="days"
+                    />
                   </div>
                 </div>
 
@@ -276,21 +291,10 @@ export function FdCalculator() {
                       className="absolute inset-0 bg-noise opacity-[0.04] mix-blend-overlay pointer-events-none"
                       aria-hidden
                     />
-                    <div
-                      className="absolute -top-24 -right-24 h-64 w-64 rounded-full opacity-30 blur-3xl"
-                      style={{ background: "oklch(0.7 0.18 150)" }}
-                      aria-hidden
-                    />
 
                     <div className="relative flex flex-wrap items-start justify-between gap-6">
                       <div>
                         <div className="inline-flex items-center gap-1.5 rounded-full bg-success/20 text-success px-2.5 py-1 text-[11px] font-medium ring-1 ring-success/30 mb-4">
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                            <path
-                              d="M5 1L6.2 3.6L9 4L7 6L7.4 9L5 7.6L2.6 9L3 6L1 4L3.8 3.6L5 1Z"
-                              fill="currentColor"
-                            />
-                          </svg>
                           Best return
                         </div>
                         <p className="text-sm opacity-70">{best.bankName}</p>
@@ -408,7 +412,7 @@ export function FdCalculator() {
                                 <p className="font-medium text-sm">{r.shortName}</p>
                                 {isBest && (
                                   <span className="text-[10px] font-medium text-success">
-                                    ★ Best
+                                    Best
                                   </span>
                                 )}
                               </div>
@@ -584,12 +588,14 @@ function NumberStepper({
   max,
   onChange,
   suffix,
+  label,
 }: {
   value: number;
   min: number;
   max: number;
   onChange: (v: number) => void;
   suffix: string;
+  label: string;
 }) {
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
@@ -598,8 +604,8 @@ function NumberStepper({
       <button
         type="button"
         onClick={dec}
-        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-        aria-label="Decrease"
+        className="relative tap-target h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
+        aria-label={`Decrease ${label}`}
       >
         −
       </button>
@@ -610,8 +616,8 @@ function NumberStepper({
       <button
         type="button"
         onClick={inc}
-        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-        aria-label="Increase"
+        className="relative tap-target h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
+        aria-label={`Increase ${label}`}
       >
         +
       </button>

@@ -56,12 +56,9 @@
 
   --gradient-hero:
     radial-gradient(at 20% 0%, oklch(0.95 0.05 145 / 0.6), transparent 50%),
-    radial-gradient(at 80% 0%, oklch(0.92 0.04 220 / 0.5), transparent 50%);
+    radial-gradient(at 80% 0%, oklch(0.94 0.03 145 / 0.45), transparent 50%);
   --gradient-best:
     linear-gradient(135deg, oklch(0.18 0.02 160) 0%, oklch(0.22 0.04 160) 100%);
-  --gradient-mesh:
-    radial-gradient(at 0% 0%, oklch(0.96 0.04 145 / 0.7), transparent 60%),
-    radial-gradient(at 100% 100%, oklch(0.95 0.03 220 / 0.5), transparent 60%);
 }
 
 :root {
@@ -167,5 +164,12 @@
 
   .bg-noise {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+
+  /* Expand hit area without changing visual size */
+  .tap-target::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
   }
 }
