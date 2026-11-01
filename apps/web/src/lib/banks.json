@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-01",
+  "lastUpdated": "2026-11-01",
   "banks": [
     {
       "id": "hdfc",
@@ -168,20 +168,20 @@
         {
           "minDays": 731,
           "maxDays": 1095,
-          "regular": 6.45,
-          "senior": 6.95
+          "regular": 6.55,
+          "senior": 7.05
         },
         {
           "minDays": 1096,
           "maxDays": 1825,
-          "regular": 6.5,
-          "senior": 7.1
+          "regular": 6.6,
+          "senior": 7.2
         },
         {
           "minDays": 1826,
           "maxDays": 3650,
-          "regular": 6.5,
-          "senior": 7
+          "regular": 6.6,
+          "senior": 7.1
         }
       ]
     },
@@ -266,8 +266,8 @@
         {
           "minDays": 555,
           "maxDays": 555,
-          "regular": 6.65,
-          "senior": 7.15
+          "regular": 6.8,
+          "senior": 7.3
         },
         {
           "minDays": 730,
@@ -278,8 +278,8 @@
         {
           "minDays": 777,
           "maxDays": 777,
-          "regular": 6.6,
-          "senior": 7.1
+          "regular": 6.75,
+          "senior": 7.25
         },
         {
           "minDays": 1095,
